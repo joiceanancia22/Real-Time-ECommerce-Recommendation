@@ -1,0 +1,36 @@
+services:
+
+  neo4j:
+    image: neo4j:5
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      - NEO4J_AUTH=neo4j/madhu0607
+
+  spark_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - neo4j
+    restart: always
+  generator:
+    build:
+      context: .
+      dockerfile: Dockerfile.generator
+    command: python streaming/data_generator.py
+    volumes:
+      - ./data:/app/data
+
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.ui
+    ports:
+      - "8501:8501"
+    depends_on:
+      - neo4j
+
